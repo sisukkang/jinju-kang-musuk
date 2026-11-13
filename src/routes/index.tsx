@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, CalendarCheck, Search, Newspaper, Landmark, HandHeart, Trees, Swords } from "lucide-react";
 import heroImg from "@/assets/hero-jaesil.jpg";
-import portrait from "@/assets/founder-portrait.jpg";
+import portraitImg from "@/assets/founder/founder-portrait.jpg";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { HangryeolFinder } from "@/components/site/HangryeolFinder";
@@ -119,7 +119,7 @@ function Index() {
       <section className="bg-ink text-paper">
         <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-14 sm:px-6 md:grid-cols-[auto_1fr]">
           <img
-            src={portrait}
+            src={portraitImg}
             alt="시조 강이식 장군 영정"
             width={332}
             height={576}
