@@ -16,6 +16,7 @@ import { Route as FounderRouteImport } from './routes/founder'
 import { Route as GenealogyRouteImport } from './routes/genealogy'
 import { Route as HangryeolRouteImport } from './routes/hangryeol'
 import { Route as NewsRouteImport } from './routes/news'
+import { Route as TreeRouteImport } from './routes/tree'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const NewsRoute = NewsRouteImport.update({
   path: '/news',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TreeRoute = TreeRouteImport.update({
+  id: '/tree',
+  path: '/tree',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/genealogy': typeof GenealogyRoute
   '/hangryeol': typeof HangryeolRoute
   '/news': typeof NewsRoute
+  '/tree': typeof TreeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/genealogy': typeof GenealogyRoute
   '/hangryeol': typeof HangryeolRoute
   '/news': typeof NewsRoute
+  '/tree': typeof TreeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/genealogy': typeof GenealogyRoute
   '/hangryeol': typeof HangryeolRoute
   '/news': typeof NewsRoute
+  '/tree': typeof TreeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/genealogy'
     | '/hangryeol'
     | '/news'
+    | '/tree'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/genealogy'
     | '/hangryeol'
     | '/news'
+    | '/tree'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/genealogy'
     | '/hangryeol'
     | '/news'
+    | '/tree'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   GenealogyRoute: typeof GenealogyRoute
   HangryeolRoute: typeof HangryeolRoute
   NewsRoute: typeof NewsRoute
+  TreeRoute: typeof TreeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tree': {
+      id: '/tree'
+      path: '/tree'
+      fullPath: '/tree'
+      preLoaderRoute: typeof TreeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   GenealogyRoute: GenealogyRoute,
   HangryeolRoute: HangryeolRoute,
   NewsRoute: NewsRoute,
+  TreeRoute: TreeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
