@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",
-    "build": "vinxi build",
-    "build:dev": "vinxi build --mode development",
+    "build": "npx @tanstack/router-cli generate && vinxi build",
+    "build:dev": "vite build --mode development",
     "preview": "vinxi preview",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -76,6 +76,7 @@
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "2.26.5",
+    "@tanstack/router-cli": "^1.168.0",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.0.0",
     "@types/node": "^22.16.5",
