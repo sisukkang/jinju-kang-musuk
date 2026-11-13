@@ -4,16 +4,14 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "vinxi dev",
-    "build": "npx @tanstack/router-cli generate && vinxi build",
+    "dev": "vite dev",
+    "build": "npx @tanstack/router-cli generate && vite build",
     "build:dev": "vite build --mode development",
-    "preview": "vinxi preview",
+    "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d .output/public"
+    "test:watch": "vitest"
   },
   "overrides": {
     "rolldown": "1.2.1"
@@ -95,7 +93,6 @@
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vinxi": "^0.5.11",
     "vite": "8.1.5",
     "vitest": "^4.1.10"
   }
