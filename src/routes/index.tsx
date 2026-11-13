@@ -84,7 +84,7 @@ function Index() {
             <Button asChild size="xl" variant="onImage">
               <Link to="/about">
                 <Swords /> 종친회·시조 소개
-              </a>
+              </Link>
             </Button>
           </div>
         </div>
@@ -164,7 +164,7 @@ function Index() {
         </div>
       </section>
 
-      {/* 공지 + 갤러리 (모바일 넘침 방지 min-w-0 적용) */}
+      {/* 공지 + 갤러리 */}
       <section className="hanji border-y border-border">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1fr_1.2fr]">
           <div className="min-w-0 w-full">
