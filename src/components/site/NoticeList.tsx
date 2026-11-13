@@ -48,7 +48,35 @@ export function LatestNotices({ limit = 4 }: { limit?: number }) {
   );
 }
 
-/** 소식 페이지용 전체 목록 (펼쳐서 본문 보기) */
+/** 뉴스/소식 페이지용 전체 목록 (NoticeList 추가) */
+export function NoticeList() {
+  const { notices } = useDemoStore();
+  const list = sortNotices(notices);
+
+  if (list.length === 0)
+    return <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">등록된 공지가 없습니다.</p>;
+
+  return (
+    <ul className="space-y-3">
+      {list.map((n) => (
+        <li key={n.id} id={n.id} className="scroll-mt-48">
+          <div className="rounded-xl border border-border bg-card shadow-card p-5">
+            <div className="flex items-center gap-3 mb-3">
+              {n.pinned ? <Pin className="size-4 shrink-0 text-primary" aria-label="상단 고정" /> : null}
+              <CategoryBadge category={n.category} />
+              <span className="min-w-0 flex-1 font-semibold">{n.title}</span>
+              <time className="shrink-0 text-[0.8rem] text-muted-foreground">{formatDate(n.createdAt)}</time>
+            </div>
+            <p className="whitespace-pre-line text-sm">{n.content}</p>
+            <p className="mt-4 text-[0.8rem] text-muted-foreground">작성: {n.author}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** 소식 페이지용 아카이브 목록 (펼쳐서 본문 보기) */
 export function NoticeArchive() {
   const { notices } = useDemoStore();
   const list = sortNotices(notices);
