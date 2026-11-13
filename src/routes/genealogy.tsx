@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Lock, ShieldCheck, CheckCircle2, Circle, ArrowLeft } from "lucide-react";
+import { Lock, ShieldCheck, CheckCircle2, Circle, ArrowLeft, ListTree } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,9 +20,9 @@ export const Route = createFileRoute("/genealogy")({
   head: () => ({
     meta: [
       { title: `전자족보 (3단계 오픈 예정) | ${CLAN.name}` },
-      { name: "description", content: "종원 인증 후 열람 가능한 전자족보 계보도 서비스 미리보기 — 3단계 오픈 예정" },
+      { name: "description", content: "종원 인증 후 열람 가능한 전자족보 상세 기록 및 족보책 열람 서비스 미리보기" },
       { property: "og:title", content: `전자족보 미리보기 | ${CLAN.name}` },
-      { property: "og:description", content: "종원 인증 후 열람 가능한 전자족보 계보도(3단계 오픈 예정)" },
+      { property: "og:description", content: "종원 인증 후 열람 가능한 전자족보(3단계 오픈 예정)" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -34,40 +34,44 @@ interface TreeNode {
   name: string;
   hanja?: string;
   generation: number;
-  born?: string;
   note?: string;
   locked?: boolean;
   children?: TreeNode[];
 }
 
 const TREE: TreeNode = {
-  name: "강병철",
+  name: "병철",
   hanja: "炳哲",
   generation: 30,
-  born: "1938",
   note: "29대손",
   children: [
     {
-      name: "강민재",
+      name: "민재",
       hanja: "敏在",
       generation: 31,
-      born: "1962",
+      note: "장남",
       children: [
-        { name: "강종훈", hanja: "鍾勳", generation: 32, born: "1988", children: [{ name: "비공개", generation: 33, locked: true }] },
-        { name: "강종아", hanja: "鍾雅", generation: 32, born: "1991", note: "女" },
+        {
+          name: "종훈",
+          hanja: "鍾勳",
+          generation: 32,
+          note: "1남",
+          children: [{ name: "비공개", generation: 33, locked: true }],
+        },
+        { name: "종아", hanja: "鍾雅", generation: 32, note: "1녀" },
       ],
     },
     {
-      name: "강현재",
+      name: "현재",
       hanja: "炫在",
       generation: 31,
-      born: "1966",
+      note: "차남",
       children: [
         {
-          name: "강종석",
+          name: "종석",
           hanja: "鍾碩",
           generation: 32,
-          born: "1993",
+          note: "1남",
           children: [
             { name: "비공개", generation: 33, locked: true },
             { name: "비공개", generation: 33, locked: true },
@@ -84,8 +88,8 @@ function NodeCard({ node }: { node: TreeNode }) {
       <div className="relative w-36 rounded-lg border border-dashed border-input bg-muted px-3 py-3 text-center">
         <div className="pointer-events-none blur-[3px] select-none" aria-hidden>
           <p className="text-[0.7rem] text-muted-foreground">{node.generation}세</p>
-          <p className="font-serif font-bold">강 OO</p>
-          <p className="text-[0.7rem]">0000년생</p>
+          <p className="font-serif font-bold">OO</p>
+          <p className="text-[0.7rem]">漢字</p>
         </div>
         <span className="absolute inset-0 flex items-center justify-center">
           <span className="flex items-center gap-1 rounded-full bg-ink px-2.5 py-1 text-[0.65rem] font-bold text-paper">
@@ -105,9 +109,8 @@ function NodeCard({ node }: { node: TreeNode }) {
       <p className="text-[0.7rem] font-bold text-gold">
         {node.generation}세{node.note ? ` · ${node.note}` : ""}
       </p>
-      <p className="font-serif text-[1.05rem] font-bold">{node.name}</p>
-      {node.hanja ? <p className="font-serif text-[0.8rem] text-muted-foreground">{node.hanja}</p> : null}
-      {node.born ? <p className="text-[0.7rem] text-muted-foreground">{node.born}년생</p> : null}
+      <p className="mt-0.5 font-serif text-[1.05rem] font-bold">{node.name}</p>
+      {node.hanja ? <p className="font-serif text-[0.8rem] text-muted-foreground">({node.hanja})</p> : null}
     </div>
   );
 }
@@ -141,47 +144,54 @@ function Branch({ node }: { node: TreeNode }) {
 }
 
 const ROADMAP = [
-  { step: "1단계", title: "종친회 홈페이지", items: "소개 · 항렬 찾기 · 소식/갤러리 · 행사 참석 신청", status: "done" as const },
+  { step: "1단계", title: "종친회 홈페이지 · 가계도", items: "소개 · 항렬 찾기 · 세보 가계도 · 소식/갤러리", status: "done" as const },
   { step: "2단계", title: "종원 회원 · 관리자 페이지", items: "종원 가입/인증 · 공지 작성 · 참석자 명단 관리", status: "doing" as const },
-  { step: "3단계", title: "전자족보 계보도", items: "인증 종원 계보 열람 · 이름 검색 · 수단(收單) 접수", status: "next" as const },
+  { step: "3단계", title: "전자족보 (족보책 원문·수단)", items: "인증 종원 상세 세보록 열람 · 행적 조회 · 수단(收單) 접수", status: "next" as const },
 ];
 
 function GenealogyPage() {
   return (
     <>
-      <PageHero eyebrow="E-JOKBO · 3단계 오픈 예정" title="전자족보 계보도">
-        종원 인증 후 열람 가능한 전자족보 계보도는 <strong>3단계에 오픈 예정</strong>입니다. 아래는 화면 구성을 미리
-        보여드리는 샘플입니다.
+      <PageHero eyebrow="E-JOKBO · 3단계 오픈 예정" title="전자족보 (세보록·원문 열람)">
+        상세 행적과 배위·묘소 기록, 족보책 영인본을 열람할 수 있는 전자족보는 <strong>3단계에 오픈 예정</strong>입니다.
+        직계·방계 계보 흐름은 현재 운영 중인 <strong>세보 가계도</strong>에서 바로 확인하실 수 있습니다.
       </PageHero>
 
       <div className="mx-auto grid max-w-7xl gap-16 px-4 py-14 sm:px-6">
         <section>
           <SectionHeading
             eyebrow="PREVIEW"
-            title="샘플 계보 트리"
-            description="개인정보 보호를 위해 최근 세대(33세 이하)는 종원 인증 후에만 공개됩니다."
+            title="종원 인증형 상세 계보 미리보기"
+            description="개인정보 보호를 위해 상세 족보 기록과 하위 세대는 종원 인증 후에만 공개됩니다."
             action={
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="seal" size="xl">
-                    <ShieldCheck /> 종원 인증하고 열람하기
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-card">
-                  <DialogHeader>
-                    <DialogTitle className="font-serif text-xl">3단계 오픈 예정 서비스입니다</DialogTitle>
-                    <DialogDescription className="text-base leading-relaxed">
-                      전자족보는 휴대폰 본인확인과 종친회 사무국의 종원 확인을 거친 분께만 열람 권한이 부여됩니다.
-                      오픈 시 공지사항과 문자로 안내해 드리겠습니다.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button size="xl">확인</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="xl">
+                  <Link to="/tree">
+                    <ListTree /> 세보 가계도(VIEW TREE) 보러가기
+                  </Link>
+                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="seal" size="xl">
+                      <ShieldCheck /> 종원 인증하고 열람하기
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-card">
+                    <DialogHeader>
+                      <DialogTitle className="font-serif text-xl">3단계 오픈 예정 서비스입니다</DialogTitle>
+                      <DialogDescription className="text-base leading-relaxed">
+                        전자족보는 휴대폰 본인확인과 종친회 사무국의 종원 확인을 거친 분께만 열람 권한이 부여됩니다.
+                        오픈 시 공지사항과 문자로 안내해 드리겠습니다.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button size="xl">확인</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
             }
           />
           <div className="hanji overflow-x-auto rounded-2xl border border-border p-8">

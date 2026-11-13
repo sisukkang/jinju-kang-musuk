@@ -14,6 +14,7 @@ export const CLAN = {
 export const NAV_ITEMS = [
   { to: "/about", label: "종친회 소개" },
   { to: "/hangryeol", label: "항렬 찾기" },
+  { to: "/tree", label: "세보 가계도" },
   { to: "/news", label: "공지사항" },
   { to: "/gallery", label: "갤러리" },
   { to: "/genealogy", label: "전자족보", badge: "준비중" },
