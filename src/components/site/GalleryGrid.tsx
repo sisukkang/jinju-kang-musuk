@@ -26,15 +26,15 @@ export function GalleryGrid({ limit, compact = false }: GalleryGridProps) {
       <div
         className={
           compact
-            ? "grid grid-cols-2 gap-3 sm: gap-4"
-            : "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            ? "grid w-full grid-cols-1 gap-4 sm:grid-cols-2"
+            : "grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
         }
       >
         {items.map((item) => (
           <figure
             key={item.id}
             onClick={() => setSelected(item)}
-            className="group cursor-pointer overflow-hidden rounded-xl border border-border bg-card shadow-card transition hover:-translate-y-0.5 hover:border-gold"
+            className="group min-w-0 w-full cursor-pointer overflow-hidden rounded-xl border border-border bg-card shadow-card transition hover:-translate-y-0.5 hover:border-gold"
           >
             <div className="aspect-[4/3] w-full overflow-hidden bg-secondary">
               <img
@@ -44,10 +44,11 @@ export function GalleryGrid({ limit, compact = false }: GalleryGridProps) {
                 className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
               />
             </div>
-            <figcaption className={compact ? "p-3" : "p-4"}>
+            <figcaption className={compact ? "p-3.5" : "p-4"}>
               <p className="truncate font-bold text-ink group-hover:text-primary">{item.title}</p>
               <p className="mt-1 flex items-center gap-1 text-[0.8rem] text-muted-foreground">
-                <Calendar className="size-3.5 text-gold" /> {item.date}
+                <Calendar className="size-3.5 shrink-0 text-gold" />
+                <span className="truncate">{item.date}</span>
               </p>
             </figcaption>
           </figure>

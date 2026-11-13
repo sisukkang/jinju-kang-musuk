@@ -44,7 +44,7 @@ const PILLARS = [
 
 function Index() {
   return (
-    <>
+    <div className="w-full overflow-x-hidden">
       {/* 히어로 */}
       <section className="relative isolate overflow-hidden">
         <img
@@ -84,7 +84,7 @@ function Index() {
             <Button asChild size="xl" variant="onImage">
               <Link to="/about">
                 <Swords /> 종친회·시조 소개
-              </Link>
+              </a>
             </Button>
           </div>
         </div>
@@ -105,7 +105,7 @@ function Index() {
             </div>
           ))}
         </div>
-        <div className="mx-auto flex flex-wrap gap-6 max-w-7xl px-4 pb-10 sm:px-6">
+        <div className="mx-auto flex max-w-7xl flex-wrap gap-6 px-4 pb-10 sm:px-6">
           <Link to="/about" className="inline-flex items-center gap-1 font-semibold text-primary hover:underline">
             종친회 및 시조 소개 자세히 보기 <ArrowRight className="size-4" />
           </Link>
@@ -164,10 +164,10 @@ function Index() {
         </div>
       </section>
 
-      {/* 공지 + 갤러리 */}
+      {/* 공지 + 갤러리 (모바일 넘침 방지 min-w-0 적용) */}
       <section className="hanji border-y border-border">
-        <div className="mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1fr_1.2fr]">
-          <div>
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1fr_1.2fr]">
+          <div className="min-w-0 w-full">
             <SectionHeading
               eyebrow="NOTICE"
               title="최신 공지사항"
@@ -179,7 +179,7 @@ function Index() {
             />
             <LatestNotices limit={4} />
           </div>
-          <div>
+          <div className="min-w-0 w-full">
             <SectionHeading
               eyebrow="GALLERY"
               title="활동 갤러리"
@@ -205,6 +205,6 @@ function Index() {
           <EventVote />
         </div>
       </section>
-    </>
+    </div>
   );
 }

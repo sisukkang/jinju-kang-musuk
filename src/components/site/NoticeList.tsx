@@ -28,13 +28,13 @@ export function LatestNotices({ limit = 4 }: { limit?: number }) {
     return <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">등록된 공지가 없습니다.</p>;
 
   return (
-    <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-card">
+    <ul className="w-full divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-card">
       {list.map((n) => (
-        <li key={n.id}>
+        <li key={n.id} className="min-w-0 w-full">
           <Link
             to="/news"
             hash={n.id}
-            className="group flex items-center gap-3 px-5 py-4 transition-colors hover:bg-muted/60"
+            className="group flex w-full items-center gap-2.5 px-3.5 py-4 transition-colors hover:bg-muted/60 sm:gap-3 sm:px-5"
           >
             {n.pinned ? <Pin className="size-4 shrink-0 text-primary" aria-label="상단 고정" /> : null}
             <CategoryBadge category={n.category} />
@@ -57,17 +57,17 @@ export function NoticeList() {
     return <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">등록된 공지가 없습니다.</p>;
 
   return (
-    <ul className="space-y-3">
+    <ul className="w-full space-y-3">
       {list.map((n) => (
-        <li key={n.id} id={n.id} className="scroll-mt-48">
-          <div className="rounded-xl border border-border bg-card shadow-card p-5">
-            <div className="flex items-center gap-3 mb-3">
+        <li key={n.id} id={n.id} className="min-w-0 w-full scroll-mt-48">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-card sm:p-5">
+            <div className="mb-3 flex items-center gap-2.5 sm:gap-3">
               {n.pinned ? <Pin className="size-4 shrink-0 text-primary" aria-label="상단 고정" /> : null}
               <CategoryBadge category={n.category} />
-              <span className="min-w-0 flex-1 font-semibold">{n.title}</span>
+              <span className="min-w-0 flex-1 font-semibold break-keep">{n.title}</span>
               <time className="shrink-0 text-[0.8rem] text-muted-foreground">{formatDate(n.createdAt)}</time>
             </div>
-            <p className="whitespace-pre-line text-sm">{n.content}</p>
+            <p className="whitespace-pre-line text-sm leading-relaxed">{n.content}</p>
             <p className="mt-4 text-[0.8rem] text-muted-foreground">작성: {n.author}</p>
           </div>
         </li>
@@ -81,19 +81,19 @@ export function NoticeArchive() {
   const { notices } = useDemoStore();
   const list = sortNotices(notices);
   return (
-    <ul className="space-y-3">
+    <ul className="w-full space-y-3">
       {list.map((n) => (
-        <li key={n.id} id={n.id} className="scroll-mt-48">
+        <li key={n.id} id={n.id} className="min-w-0 w-full scroll-mt-48">
           <details className="group rounded-xl border border-border bg-card shadow-card open:ring-1 open:ring-gold/50">
-            <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4">
+            <summary className="flex cursor-pointer list-none items-center gap-2.5 px-3.5 py-4 sm:gap-3 sm:px-5">
               {n.pinned ? <Pin className="size-4 shrink-0 text-primary" aria-label="상단 고정" /> : null}
               <CategoryBadge category={n.category} />
-              <span className="min-w-0 flex-1 font-semibold">{n.title}</span>
+              <span className="min-w-0 flex-1 truncate font-semibold">{n.title}</span>
               <time className="shrink-0 text-[0.8rem] text-muted-foreground">{formatDate(n.createdAt)}</time>
               <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90" />
             </summary>
-            <div className="border-t border-border px-5 py-5">
-              <p className="whitespace-pre-line">{n.content}</p>
+            <div className="border-t border-border px-4 py-5 sm:px-5">
+              <p className="whitespace-pre-line leading-relaxed">{n.content}</p>
               <p className="mt-4 text-[0.8rem] text-muted-foreground">작성: {n.author}</p>
             </div>
           </details>
