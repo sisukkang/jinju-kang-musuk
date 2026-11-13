@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Search, ChevronDown, ChevronRight, Network, ListTree, RotateCcw, Users, BookOpen } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHero } from "@/components/site/PageHero";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import { CLAN } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
+import { CLAN } from "@/lib/site-config";
 
 export const Route = createFileRoute("/tree")({
   head: () => ({
@@ -16,22 +17,18 @@ export const Route = createFileRoute("/tree")({
   component: TreePage,
 });
 
-/** 가계도 노드 데이터 타입 (성씨 및 나이 제외, 이름과 한자 중심) */
-export interface FamilyNode {
+interface FamilyNode {
   id: string;
-  generation: number; // 세수 (예: 1, 18, 28~33...)
-  generationLabel?: string; // 특별 호칭 (예: "시조(始祖)", "파조(派祖)")
-  nameKr: string; // 성을 제외한 한글 이름 (예: "이식", "병철")
-  nameHanja: string; // 성을 제외한 한자 이름 (예: "以式", "炳哲")
-  branchRelation?: string; // 관계 표기 (예: "장남", "차남", "삼남", "1남", "1녀")
-  title?: string; // 관직·시호·직책 등 간략 설명
+  generation: number;
+  generationLabel?: string;
+  nameKr: string;
+  nameHanja: string;
+  branchRelation?: string;
+  title?: string;
   children?: FamilyNode[];
 }
 
-/** 
- * 임시 예시 종원 명단 데이터 (성씨 및 나이 제외)
- * 28세(永/영) -> 29세(勳/훈) -> 30세(炳/병, 熙/희) -> 31세(在/재) -> 32세(鍾/종) -> 33세(洙/수) 흐름 예시
- */
+/** 예시 종원 명단 (성씨 및 나이 제외, 이름과 한자 중심) */
 const INITIAL_TREE_DATA: FamilyNode = {
   id: "gen-1",
   generation: 1,
@@ -56,7 +53,6 @@ const INITIAL_TREE_DATA: FamilyNode = {
           nameHanja: "大永",
           title: "전 종친회장",
           children: [
-            // === [1] 장남(석훈) 계열 ===
             {
               id: "gen-29-1",
               generation: 29,
@@ -151,8 +147,6 @@ const INITIAL_TREE_DATA: FamilyNode = {
                 },
               ],
             },
-
-            // === [2] 차남(보훈) 계열 ===
             {
               id: "gen-29-2",
               generation: 29,
@@ -194,8 +188,6 @@ const INITIAL_TREE_DATA: FamilyNode = {
                 },
               ],
             },
-
-            // === [3] 삼남(정훈) 계열 ===
             {
               id: "gen-29-3",
               generation: 29,
@@ -222,258 +214,83 @@ const INITIAL_TREE_DATA: FamilyNode = {
   ],
 };
 
-/** 검색어가 포함된 노드 ID와 상위 부모 ID들을 찾는 함수 */
-function findMatchingPaths(node: FamilyNode, query: string): { matchedIds: Set<string>; expandedIds: Set<string> } {
-  const matchedIds = new Set<string>();
-  const expandedIds = new Set<string>();
-  const cleanQuery = query.trim();
+function collectAllIds(node: FamilyNode): string[] {
+  const result: string[] = [node.id];
+  if (node.children) {
+    for (let i = 0; i < node.children.length; i++) {
+      const childIds = collectAllIds(node.children[i]);
+      for (let j = 0; j < childIds.length; j++) {
+        result.push(childIds[j]);
+      }
+    }
+  }
+  return result;
+}
 
-  if (!cleanQuery) return { matchedIds, expandedIds };
+const ALL_NODE_IDS = collectAllIds(INITIAL_TREE_DATA);
 
-  function traverse(current: FamilyNode, ancestors: string[]): boolean {
-    const isMatch =
-      current.nameKr.includes(cleanQuery) ||
-      current.nameHanja.includes(cleanQuery) ||
-      `${current.generation}세`.includes(cleanQuery) ||
-      Boolean(current.generationLabel && current.generationLabel.includes(cleanQuery)) ||
-      Boolean(current.title && current.title.includes(cleanQuery));
+function findMatches(node: FamilyNode, query: string): { matched: string[]; expanded: string[] } {
+  const matched: string[] = [];
+  const expanded: string[] = [];
+  const q = query.trim();
+  if (!q) return { matched, expanded };
 
-    let childMatched = false;
-    if (current.children) {
-      for (const child of current.children) {
-        if (traverse(child, [...ancestors, current.id])) {
-          childMatched = true;
+  function walk(curr: FamilyNode, parents: string[]): boolean {
+    const isHit =
+      curr.nameKr.includes(q) ||
+      curr.nameHanja.includes(q) ||
+      `${curr.generation}세`.includes(q) ||
+      Boolean(curr.generationLabel && curr.generationLabel.includes(q)) ||
+      Boolean(curr.title && curr.title.includes(q));
+
+    let childHit = false;
+    if (curr.children) {
+      for (let i = 0; i < curr.children.length; i++) {
+        if (walk(curr.children[i], [...parents, curr.id])) {
+          childHit = true;
         }
       }
     }
 
-    if (isMatch) {
-      matchedIds.add(current.id);
-      ancestors.forEach((id) => expandedIds.add(id));
-    }
-
-    if (childMatched) {
-      expandedIds.add(current.id);
-    }
-
-    return isMatch || childMatched;
-  }
-
-  traverse(node, []);
-  return { matchedIds, expandedIds };
-}
-
-/** 모든 노드의 ID를 수집 (전체 펼치기용) */
-function getAllNodeIds(node: FamilyNode): string[] {
-  let ids = [node.id];
-  if (node.children) {
-    for (const c of node.children) {
-      ids = ids.concat(getAllNodeIds(c));
-    }
-  }
-  return ids;
-}
-
-/** 전체 인원수 계산 */
-function countNodes(node: FamilyNode): number {
-  let count = 1;
-  if (node.children) {
-    for (const c of node.children) {
-      count += countNodes(c);
-    }
-  }
-  return count;
-}
-
-function TreePage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"accordion" | "diagram">("accordion");
-  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set(getAllNodeIds(INITIAL_TREE_DATA)));
-
-  const totalMembers = useMemo(() => countNodes(INITIAL_TREE_DATA), []);
-
-  const { matchedIds, expandedIds } = useMemo(
-    () => findMatchingPaths(INITIAL_TREE_DATA, searchQuery),
-    [searchQuery],
-  );
-
-  const activeOpenIds = searchQuery.trim() ? expandedIds : openIds;
-
-  const toggleNode = (id: string) => {
-    setOpenIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
+    if (isHit) {
+      matched.push(curr.id);
+      for (let i = 0; i < parents.length; i++) {
+        if (!expanded.includes(parents[i])) expanded.push(parents[i]);
       }
-      return next;
-    });
-  };
+    }
+    if (childHit && !expanded.includes(curr.id)) {
+      expanded.push(curr.id);
+    }
+    return isHit || childHit;
+  }
 
-  const expandAll = () => setOpenIds(new Set(getAllNodeIds(INITIAL_TREE_DATA)));
-  const collapseModern = () => setOpenIds(new Set(["gen-1", "gen-pajo", "gen-28-1"]));
-
-  return (
-    <>
-      {/* 상단 배너 영역 (직접 구현하여 외부 컴포넌트 의존성 충돌 방지) */}
-      <section className="bg-ink text-paper border-b border-gold/30">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
-          <p className="text-[0.75rem] font-bold tracking-[0.25em] text-gold">GENEALOGY · VIEW TREE</p>
-          <h1 className="mt-2 font-serif text-[2rem] font-bold sm:text-[2.6rem]">무숙공파 세보 가계도</h1>
-          <p className="mt-3 max-w-2xl text-[0.95rem] text-paper/80">
-            시조 강이식 장군과 파조 무숙공 이하 후손들의 세수(世數)와 휘(이름·한자)를 계보 트리로 한눈에 확인하실 수 있습니다.
-          </p>
-        </div>
-      </section>
-
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <SectionHeading
-          eyebrow="FAMILY TREE"
-          title={`직계 · 방계 가계도 열람 (등재 예시 ${totalMembers}명)`}
-          description="성을 제외한 이름과 한자, 세수 중심으로 간결하게 구성되었습니다. 모바일에서는 '세로 계단형', PC에서는 '전체 가계도'를 추천합니다."
-          action={
-            <Button asChild variant="outline">
-              <Link to="/genealogy">
-                <BookOpen className="size-4" /> 전자족보(상세 기록) 안내
-              </Link>
-            </Button>
-          }
-        />
-
-        {/* 검색 및 뷰 전환 컨트롤 바 */}
-        <div className="mt-6 flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-card sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative flex-1 max-w-md">
-            <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="이름(예: 병철, 종훈), 한자, 또는 세수(31세) 검색..."
-              className="h-11 w-full rounded-lg border border-input bg-background pr-14 pl-10 text-sm focus:border-primary focus:outline-none"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute top-1/2 right-3 -translate-y-1/2 text-xs font-semibold text-muted-foreground hover:text-foreground"
-              >
-                초기화
-              </button>
-            )}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex rounded-lg border border-border bg-muted/40 p-1">
-              <button
-                type="button"
-                onClick={() => setViewMode("accordion")}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
-                  viewMode === "accordion"
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <ListTree className="size-3.5" /> 세로 계단형 (모바일 추천)
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("diagram")}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
-                  viewMode === "diagram"
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <Network className="size-3.5" /> 전체 가계도 (가로 트리)
-              </button>
-            </div>
-
-            {viewMode === "accordion" && !searchQuery && (
-              <div className="flex gap-1.5">
-                <button
-                  type="button"
-                  onClick={expandAll}
-                  className="inline-flex items-center rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
-                >
-                  전체 펼치기
-                </button>
-                <button
-                  type="button"
-                  onClick={collapseModern}
-                  className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
-                >
-                  <RotateCcw className="size-3" /> 29세 이하 접기
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* 검색 결과 안내 */}
-        {searchQuery.trim() && (
-          <div className="mt-4 flex items-center justify-between rounded-lg bg-gold-soft px-4 py-2.5 text-xs text-ink">
-            <span>
-              <strong>"{searchQuery}"</strong> 검색 결과 총 <strong>{matchedIds.size}명</strong>의 종원이 확인되었습니다.
-            </span>
-          </div>
-        )}
-
-        {/* 가계도 출력 영역 */}
-        <div className="mt-8">
-          {viewMode === "accordion" ? (
-            <div className="hanji mx-auto max-w-4xl rounded-2xl border border-border p-4 shadow-card sm:p-8">
-              <AccordionTreeItem
-                node={INITIAL_TREE_DATA}
-                openIds={activeOpenIds}
-                matchedIds={matchedIds}
-                onToggle={toggleNode}
-              />
-            </div>
-          ) : (
-            <div className="hanji overflow-x-auto rounded-2xl border border-border p-8 shadow-card">
-              <div className="mx-auto w-max">
-                <DiagramBranch node={INITIAL_TREE_DATA} matchedIds={matchedIds} />
-              </div>
-              <p className="mt-6 text-center text-xs text-muted-foreground">
-                💡 가계도가 화면보다 넓을 경우 박스 내부를 좌우로 스크롤하여 전체 형제·후손 가지를 확인하실 수 있습니다.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  );
+  walk(node, []);
+  return { matched, expanded };
 }
 
-/** 1. 세로 계단식(아코디언) 트리 아이템 */
-function AccordionTreeItem({
+function AccordionItem({
   node,
   openIds,
   matchedIds,
   onToggle,
 }: {
   node: FamilyNode;
-  openIds: Set<string>;
-  matchedIds: Set<string>;
+  openIds: string[];
+  matchedIds: string[];
   onToggle: (id: string) => void;
 }) {
   const hasChildren = Boolean(node.children && node.children.length > 0);
-  const isOpen = openIds.has(node.id);
-  const isMatched = matchedIds.has(node.id);
+  const isOpen = openIds.includes(node.id);
+  const isMatched = matchedIds.includes(node.id);
   const isFounder = node.generation <= 18;
 
   return (
     <div className="relative">
       <div
         className={cn(
-          "group relative flex items-center justify-between gap-3 rounded-xl border p-3.5 sm:p-4 transition-all",
-          isFounder
-            ? "border-gold/60 bg-ink text-paper"
-            : "border-border bg-card text-foreground hover:border-gold/50",
-          isMatched && "border-primary bg-accent/20 ring-2 ring-primary",
+          "flex items-center justify-between gap-3 rounded-xl border p-3.5 sm:p-4 transition-all",
+          isFounder ? "border-gold/60 bg-ink text-paper" : "border-border bg-card text-foreground",
+          isMatched && "border-primary ring-2 ring-primary",
         )}
       >
         <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -486,13 +303,12 @@ function AccordionTreeItem({
             {node.generationLabel ? `${node.generationLabel} · ${node.generation}세` : `${node.generation}세`}
           </span>
 
-          {node.branchRelation && (
+          {node.branchRelation ? (
             <span className="inline-flex shrink-0 items-center rounded-sm bg-primary/10 px-2 py-0.5 text-[0.7rem] font-semibold text-primary">
               {node.branchRelation}
             </span>
-          )}
+          ) : null}
 
-          {/* 성을 제외한 이름 + 한자 */}
           <div className="flex items-baseline gap-1.5">
             <span className="font-serif text-lg font-bold tracking-wide">{node.nameKr}</span>
             <span className={cn("font-serif text-sm", isFounder ? "text-paper/80" : "text-muted-foreground")}>
@@ -500,14 +316,12 @@ function AccordionTreeItem({
             </span>
           </div>
 
-          {node.title && (
-            <span className={cn("text-xs", isFounder ? "text-gold" : "text-muted-foreground")}>
-              · {node.title}
-            </span>
-          )}
+          {node.title ? (
+            <span className={cn("text-xs", isFounder ? "text-gold" : "text-muted-foreground")}>· {node.title}</span>
+          ) : null}
         </div>
 
-        {hasChildren && (
+        {hasChildren ? (
           <button
             type="button"
             onClick={() => onToggle(node.id)}
@@ -518,17 +332,15 @@ function AccordionTreeItem({
                 : "bg-muted text-muted-foreground hover:bg-secondary hover:text-foreground",
             )}
           >
-            <Users className="size-3.5" />
-            <span>자손 {node.children!.length}</span>
-            {isOpen ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+            <span>자손 {node.children!.length}명 {isOpen ? "▲" : "▼"}</span>
           </button>
-        )}
+        ) : null}
       </div>
 
-      {hasChildren && isOpen && (
+      {hasChildren && isOpen ? (
         <div className="relative mt-2.5 ml-3.5 space-y-2.5 border-l-2 border-gold/40 pl-3.5 sm:ml-6 sm:pl-5">
           {node.children!.map((child) => (
-            <AccordionTreeItem
+            <AccordionItem
               key={child.id}
               node={child}
               openIds={openIds}
@@ -537,21 +349,20 @@ function AccordionTreeItem({
             />
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
 
-/** 2. 가로 가지형 트리 다이어그램 */
-function DiagramBranch({ node, matchedIds }: { node: FamilyNode; matchedIds: Set<string> }) {
-  const isMatched = matchedIds.has(node.id);
+function DiagramBranch({ node, matchedIds }: { node: FamilyNode; matchedIds: string[] }) {
+  const isMatched = matchedIds.includes(node.id);
   const isFounder = node.generation <= 18;
 
   return (
     <div className="flex flex-col items-center">
       <div
         className={cn(
-          "w-36 rounded-lg border px-2.5 py-2.5 text-center shadow-card transition-all",
+          "w-36 rounded-lg border px-2.5 py-2.5 text-center shadow-card",
           isFounder ? "border-gold bg-ink text-paper" : "border-gold/50 bg-card text-foreground",
           isMatched && "border-primary ring-2 ring-primary",
         )}
@@ -590,5 +401,134 @@ function DiagramBranch({ node, matchedIds }: { node: FamilyNode; matchedIds: Set
         </>
       ) : null}
     </div>
+  );
+}
+
+function TreePage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"accordion" | "diagram">("accordion");
+  const [openIds, setOpenIds] = useState<string[]>(ALL_NODE_IDS);
+
+  const { matched, expanded } = findMatches(INITIAL_TREE_DATA, searchQuery);
+  const activeOpenIds = searchQuery.trim() ? expanded : openIds;
+
+  const toggleNode = (id: string) => {
+    setOpenIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+  };
+
+  return (
+    <>
+      <PageHero eyebrow="GENEALOGY · VIEW TREE" title="무숙공파 세보 가계도">
+        시조 강이식 장군과 파조 무숙공 이하 후손들의 세수(世數)와 휘(이름·한자)를 계보 트리로 한눈에 확인하실 수 있습니다.
+      </PageHero>
+
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+        <SectionHeading
+          eyebrow="FAMILY TREE"
+          title={`직계 · 방계 가계도 열람 (등재 예시 ${ALL_NODE_IDS.length}명)`}
+          description="성을 제외한 이름과 한자, 세수 중심으로 간결하게 구성되었습니다. 모바일에서는 '세로 계단형', PC에서는 '전체 가계도'를 추천합니다."
+          action={
+            <Button asChild variant="outline" size="xl">
+              <Link to="/genealogy">전자족보 안내 보기</Link>
+            </Button>
+          }
+        />
+
+        {/* 컨트롤 바 */}
+        <div className="mt-6 flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-card sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative flex-1 max-w-md">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="이름(예: 병철, 종훈), 한자, 또는 세수(31세) 검색..."
+              className="h-11 w-full rounded-lg border border-input bg-background px-4 text-sm focus:border-primary focus:outline-none"
+            />
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-xs font-semibold text-muted-foreground hover:text-foreground"
+              >
+                초기화
+              </button>
+            ) : null}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-lg border border-border bg-muted/40 p-1">
+              <button
+                type="button"
+                onClick={() => setViewMode("accordion")}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
+                  viewMode === "accordion" ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+                )}
+              >
+                세로 계단형 (모바일 추천)
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("diagram")}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
+                  viewMode === "diagram" ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+                )}
+              >
+                전체 가계도 (가로 트리)
+              </button>
+            </div>
+
+            {viewMode === "accordion" && !searchQuery ? (
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setOpenIds(ALL_NODE_IDS)}
+                  className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+                >
+                  전체 펼치기
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOpenIds(["gen-1", "gen-pajo", "gen-28-1"])}
+                  className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+                >
+                  29세 이하 접기
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        {searchQuery.trim() ? (
+          <div className="mt-4 rounded-lg bg-gold-soft px-4 py-2.5 text-xs text-ink">
+            <strong>"{searchQuery}"</strong> 검색 결과 총 <strong>{matched.length}명</strong>의 종원이 확인되었습니다.
+          </div>
+        ) : null}
+
+        <div className="mt-8">
+          {viewMode === "accordion" ? (
+            <div className="hanji mx-auto max-w-4xl rounded-2xl border border-border p-4 shadow-card sm:p-8">
+              <AccordionItem
+                node={INITIAL_TREE_DATA}
+                openIds={activeOpenIds}
+                matchedIds={matched}
+                onToggle={toggleNode}
+              />
+            </div>
+          ) : (
+            <div className="hanji overflow-x-auto rounded-2xl border border-border p-8 shadow-card">
+              <div className="mx-auto w-max">
+                <DiagramBranch node={INITIAL_TREE_DATA} matchedIds={matched} />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <Link to="/" className="mt-10 inline-flex items-center gap-1 font-semibold text-primary hover:underline">
+          <ArrowLeft className="size-4" /> 홈으로 돌아가기
+        </Link>
+      </div>
+    </>
   );
 }

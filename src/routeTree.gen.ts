@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as FounderRouteImport } from './routes/founder'
+import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as GenealogyRouteImport } from './routes/genealogy'
 import { Route as HangryeolRouteImport } from './routes/hangryeol'
 import { Route as NewsRouteImport } from './routes/news'
@@ -36,6 +37,11 @@ const AdminRoute = AdminRouteImport.update({
 const FounderRoute = FounderRouteImport.update({
   id: '/founder',
   path: '/founder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GalleryRoute = GalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GenealogyRoute = GenealogyRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/founder': typeof FounderRoute
+  '/gallery': typeof GalleryRoute
   '/genealogy': typeof GenealogyRoute
   '/hangryeol': typeof HangryeolRoute
   '/news': typeof NewsRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/founder': typeof FounderRoute
+  '/gallery': typeof GalleryRoute
   '/genealogy': typeof GenealogyRoute
   '/hangryeol': typeof HangryeolRoute
   '/news': typeof NewsRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/founder': typeof FounderRoute
+  '/gallery': typeof GalleryRoute
   '/genealogy': typeof GenealogyRoute
   '/hangryeol': typeof HangryeolRoute
   '/news': typeof NewsRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/founder'
+    | '/gallery'
     | '/genealogy'
     | '/hangryeol'
     | '/news'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/founder'
+    | '/gallery'
     | '/genealogy'
     | '/hangryeol'
     | '/news'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/founder'
+    | '/gallery'
     | '/genealogy'
     | '/hangryeol'
     | '/news'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
   FounderRoute: typeof FounderRoute
+  GalleryRoute: typeof GalleryRoute
   GenealogyRoute: typeof GenealogyRoute
   HangryeolRoute: typeof HangryeolRoute
   NewsRoute: typeof NewsRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/founder'
       fullPath: '/founder'
       preLoaderRoute: typeof FounderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/genealogy': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
   FounderRoute: FounderRoute,
+  GalleryRoute: GalleryRoute,
   GenealogyRoute: GenealogyRoute,
   HangryeolRoute: HangryeolRoute,
   NewsRoute: NewsRoute,
