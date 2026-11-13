@@ -1,0 +1,220 @@
+/*
+ * Tailwind v4 entry: config lives here, with no tailwind.config.js or PostCSS plugin.
+ * Keep every @import in this top block. Web fonts load via <link> in src/routes/__root.tsx.
+ */
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * 한지 & 단청 design system
+ * 한지 미색 #FAF8F5 · 먹색 #1F2937 · 단청 적색 #9B2C2C · 금색 #B7791F
+ */
+
+@theme inline {
+  --font-sans: "Noto Serif KR", "Batang", Georgia, serif;
+  --font-serif: "Noto Serif KR", "Batang", Georgia, serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-deep: var(--primary-deep);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-gold-soft: var(--gold-soft);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-celadon: var(--celadon);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.5rem;
+  --paper: oklch(0.98 0.005 78.3); /* #FAF8F5 */
+  --ink: oklch(0.278 0.03 256.8); /* #1F2937 */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: oklch(0.995 0.003 78);
+  --card-foreground: var(--ink);
+  --popover: oklch(0.995 0.003 78);
+  --popover-foreground: var(--ink);
+  --primary: oklch(0.465 0.147 24.9); /* #9B2C2C 단청 적색 */
+  --primary-deep: oklch(0.36 0.12 24);
+  --primary-foreground: oklch(0.985 0.006 78);
+  --gold: oklch(0.626 0.125 70.4); /* #B7791F 금색 */
+  --gold-foreground: oklch(0.99 0.004 78);
+  --gold-soft: oklch(0.94 0.04 80);
+  --celadon: oklch(0.55 0.07 170);
+  --secondary: oklch(0.95 0.012 78);
+  --secondary-foreground: var(--ink);
+  --muted: oklch(0.955 0.01 78);
+  --muted-foreground: oklch(0.47 0.025 257);
+  --accent: oklch(0.94 0.03 30);
+  --accent-foreground: var(--primary-deep);
+  --destructive: oklch(0.55 0.2 27);
+  --destructive-foreground: oklch(0.985 0.006 78);
+  --border: oklch(0.89 0.018 75);
+  --input: oklch(0.85 0.02 75);
+  --ring: oklch(0.626 0.125 70.4);
+  --chart-1: var(--primary);
+  --chart-2: var(--gold);
+  --chart-3: var(--celadon);
+  --chart-4: oklch(0.5 0.05 257);
+  --chart-5: oklch(0.7 0.1 50);
+  --sidebar: var(--paper);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--sidebar-border);
+  --sidebar-ring: var(--sidebar-ring);
+
+  --gradient-hero: linear-gradient(
+    100deg,
+    color-mix(in oklab, var(--ink) 88%, transparent) 0%,
+    color-mix(in oklab, var(--ink) 60%, transparent) 45%,
+    color-mix(in oklab, var(--ink) 10%, transparent) 100%
+  );
+  --gradient-seal: linear-gradient(145deg, var(--primary), var(--primary-deep));
+  --shadow-card: 0 1px 0 color-mix(in oklab, var(--gold) 25%, transparent),
+    0 12px 30px -18px color-mix(in oklab, var(--ink) 35%, transparent);
+  --shadow-float: 0 18px 40px -12px color-mix(in oklab, var(--primary-deep) 55%, transparent);
+}
+
+/* 시니어 배려: 전체 글자 크기 (rem 기준이라 모든 요소가 함께 커짐) */
+html {
+  font-size: 21px;
+}
+html[data-font-size="small"] {
+  font-size: 18px;
+}
+html[data-font-size="large"] {
+  font-size: 24px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-serif);
+    line-height: 1.7;
+    letter-spacing: -0.015em;
+    word-break: keep-all;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+  }
+}
+
+/* 한지 결 텍스처 */
+@utility hanji {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(color-mix(in oklab, var(--gold) 7%, transparent) 1px, transparent 1px),
+    radial-gradient(color-mix(in oklab, var(--ink) 4%, transparent) 1px, transparent 1px);
+  background-size:
+    22px 22px,
+    37px 37px;
+  background-position:
+    0 0,
+    11px 17px;
+}
+
+/* 단청 띠 장식 */
+@utility dancheong-band {
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--primary) 0 28px,
+    var(--gold) 28px 36px,
+    var(--celadon) 36px 52px,
+    var(--gold) 52px 60px
+  );
+}
+
+@utility gold-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+@utility bg-hero-overlay {
+  background-image: var(--gradient-hero);
+}
+
+@utility bg-seal {
+  background-image: var(--gradient-seal);
+}
+
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+@utility shadow-float {
+  box-shadow: var(--shadow-float);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-rise {
+  animation: rise-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
